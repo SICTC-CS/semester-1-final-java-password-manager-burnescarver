@@ -2,11 +2,20 @@ import java.util.Scanner;
 import java.util.Random;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.File;
 public class JavaPasswordManager {
     public static void main(String[] args){
         //Creating import objects
         Scanner ui = new Scanner(System.in);
         Random rand = new Random();
+        //initializing FileWriter
+        //help from Geeks for Geeks -> (https://www.geeksforgeeks.org/io-bufferedwriter-class-methods-java/)
+        FileWriter dataSave;
+        dataSave = new FileWriter("dataSave.txt");
+        // Initializing BufferedWriter
+        BufferedWriter fileEdit = new BufferedWriter(dataSave);
         //Creating ArrayLists
         ArrayList<String> usernameList = new ArrayList<String>();
         ArrayList<String> nameList = new ArrayList<String>();
@@ -35,7 +44,7 @@ public class JavaPasswordManager {
             }
             else{
                 System.out.print("I don't think thats a given action, please try again");
-            }
+            }    
         }
     }
     public static void createUser(ArrayList<String> nameList, ArrayList<String> usernameList, ArrayList<String> passwordList, ArrayList<String> categoryList, ArrayList<String> hintList){
@@ -48,11 +57,19 @@ public class JavaPasswordManager {
         int hintChoice = 0;
         String hintS = "";
         boolean createUserCheck = true;
-        //info variables
-        String nameC;
-        String usernameC;
-        String passwordC;
-        String categoryC;
+        //info variables 
+        String nameC = "";
+        String usernameC = "";
+        String passwordC = "";
+        String categoryC = "";
+
+        //initializing FileWriter
+        //help from Geeks for Geeks -> (https://www.geeksforgeeks.org/io-bufferedwriter-class-methods-java/)
+        FileWriter dataSave;
+        dataSave = new FileWriter("dataSave.txt");
+        // Initializing BufferedWriter
+        BufferedWriter fileEdit = new BufferedWriter(dataSave);
+
         //Asking for password hint system
         while(userCreateHintRepeat){
             System.out.print("Please pick a number for your hint on your password: \n\t 1. Your mothers maiden name \n\t 2. Your first pets name \n\t 3. What highschool you went to");
@@ -81,9 +98,9 @@ public class JavaPasswordManager {
             System.out.print("What is your username: ");
             usernameC = ui.nextLine();
             //Asking for password
-            System.out.print("What will your password be: ");
+            System.out.print("What will your password be (make sure it lines up with what you chose for your hint): ");
             passwordC = ui.nextLine();
-            //Asking for password
+            //Asking for catagory
             System.out.print("What will your category be: ");
             categoryC = ui.nextLine();
             //checking for password requirements
@@ -112,12 +129,32 @@ public class JavaPasswordManager {
                 }
             }
         }
-        //adding name to nameList, username to usernameList, password to passwordList, category to categoryList, and hintS to hintList
+        String stringToWrite = nameC+usernameC+passwordC+categoryC+hintS;
+        BufferWriter.writeString(stringToWrite);
         nameList.add(nameC);
         usernameList.add(usernameC);
         passwordList.add(passwordC);
         categoryList.add(categoryC);
         hintList.add(hintS);
+        //if(in==null){
+        //    try{
+        //        in = new Scanner(new File(dataSave));
+        //        //attempting to write all user data to txt file
+        //        fileEdit.write(nameC);
+        //        fileEdit.write(usernameC);
+        //        fileEdit.write(passwordC);
+        //        fileEdit.write(categoryC);
+        //        fileEdit.write(hintS);
+        //        //attempting to add name to nameList, username to usernameList, password to passwordList, category to categoryList, and hintS to hintList
+        //        
+        //    }
+        //    catch(Exception e){
+        //        System.err.println("Cannot open the file!");
+        //        e.printStackTrace();
+        //    }
+        //}
+        
+        fileEdit.close();
     }
 
     public static void loginUser(ArrayList<String> nameList, ArrayList<String> usernameList, ArrayList<String> passwordList, ArrayList<String> categoryList, ArrayList<String> hintList){
@@ -137,7 +174,7 @@ public class JavaPasswordManager {
             //Asking for username
             System.out.print("What is your username: ");
             usernameQ = ui.nextLine();
-
+            
             //If the usernameQ is in usernameList set usernameIndex to the index of usernameQ
             if(usernameList.contains(usernameQ)){
                 usernameIndex = usernameList.indexOf(usernameQ);
@@ -237,6 +274,7 @@ public class JavaPasswordManager {
             usernameList.remove(nameIndex);
             passwordList.remove(nameIndex);
             categoryList.remove(nameIndex);
+            hintList.remove(nameIndex);
         }
     }
     public static void genPassword(ArrayList<String> nameList, ArrayList<String> usernameList, ArrayList<String> passwordList, ArrayList<String> categoryList, ArrayList<String> hintList){
