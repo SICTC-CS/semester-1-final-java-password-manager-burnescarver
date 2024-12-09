@@ -21,10 +21,18 @@ public class PasswordManager {
 
 		// Initializing BufferedWriter
 		// BufferedWriter fileEdit = new BufferedWriter(dataSave);
+		
+		if (system_user == null) {
+			System.out.println("No admin account found, create one now");
+			system_user = createSystemUser();
+		}
+
+		if (!loginUser())
+			System.exit(1);
 
 		boolean should_continue = true;
 		while (should_continue) {
-			System.out.print("Account Options\n\t1. List\n\t2. Create\n\t3. Update\n\t4. Delete\n\t5. Exit\nChoice: ");
+			System.out.print("Account Options\n\t1. List\n\t2. Create\n\t3. Inspect\n\t4. Update\n\t5. Delete\n\t6. Exit\nChoice: ");
 			int choiceAction = ui.nextInt();
 			ui.nextLine();
 			switch (choiceAction) {
@@ -32,15 +40,18 @@ public class PasswordManager {
 					listUsers();
 					break;
 				case 2:
-					createUser();
+					users.add(createUser());
 					break;
 				case 3:
-					updateUser();
+					inspectUser();
 					break;
 				case 4:
-					deleteUser();
+					updateUser();
 					break;
 				case 5:
+					deleteUser();
+					break;
+				case 6:
 					should_continue = false;
 					break;
 				default:
@@ -91,12 +102,38 @@ public class PasswordManager {
 		return new User(username, name, password, category, null);
 	}
 
+	public static User createSystemUser() {
+		System.out.print("Username: ");
+		String username = ui.nextLine().trim();
+
+		String password;
+		System.out.println("Password Requirements\n\t- At least one capital\n\t- At least one number\n\t- At least one special character (!@#$%&*?)\n\tAt least 8 characters long");
+		do {
+			System.out.print("Password: ");
+			password = ui.nextLine().trim();
+		} while (!Password.check(password));
+
+		return new User(username, "Admin", password, "System", null);
+	}
+
+	public static void inspectUser() {
+		int choice = userChoice();
+		if (choice == -1)
+			return;
+		User chosen = users.get(choice);
+
+		System.out.printf("%s (%s):\n\tUsername: %s\n\tPassword: %s\n", 
+				chosen.name, chosen.category, 
+				chosen.username, chosen.password);
+	}
+
 	public static boolean loginUser() {
+		System.out.println("Log in");
+
 		boolean found_user = false;
 		for (int i = 0; i < 3; i++) {
-			System.out.println("Username: ");
-			String username = ui.next();
-			ui.nextLine();
+			System.out.print("Username: ");
+			String username = ui.nextLine().trim();
 
 			if (system_user.username == username) {
 				found_user = true;
@@ -112,9 +149,8 @@ public class PasswordManager {
 		}
 
 		for (int i = 0; i < 3; i++) {
-			System.out.println("Password: ");
-			String password = ui.next();
-			ui.nextLine();
+			System.out.print("Password: ");
+			String password = ui.nextLine().trim();
 
 			if (system_user.password == password) {
 				System.out.println("Login successful");
@@ -132,6 +168,8 @@ public class PasswordManager {
 
 	public static void deleteUser(){
 		int choice = userChoice();
+		if (choice == -1)
+			return;
 
 		System.out.print("Confirm [y/N]: ");
 		char input = Character.toLowerCase((char)ui.nextByte());
@@ -145,8 +183,12 @@ public class PasswordManager {
 	}
 
 	public static int userChoice() {
+		if (users.size() < 1) {
+			System.out.println("No users to choose from");
+			return -1;
+		}
 		for (int i = 0; i < users.size(); i++) {
-			System.out.printf("%d %s\n", i + 1, users.get(i));
+			System.out.printf("%d. %s\n", i + 1, users.get(i));
 		}
 		System.out.print("User: ");
 
@@ -167,12 +209,17 @@ public class PasswordManager {
 			if (user.category == category)
 				category_users.add(user);
 
+		if (category_users.size() < 1) {
+			System.out.println("No users to choose from");
+			return -1;
+		}
+
 		for (int i = 0; i < category_users.size(); i++) {
 			if (category_users.get(i).category != category) {
 				i--;
 				continue;
 			}
-			System.out.printf("%d %s\n", i + 1, category_users.get(i));
+			System.out.printf("%d. %s\n", i + 1, category_users.get(i));
 		}
 		System.out.print("User: ");
 

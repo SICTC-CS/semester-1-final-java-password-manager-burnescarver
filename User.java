@@ -13,4 +13,9 @@ public class User {
 		this.category  = category;
 		this.hint = hint;
 	}
+
+	@Override
+	public String toString() {
+		return String.format("\t%s: %s\n", this.name, this.username);
+	}
 }
