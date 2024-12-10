@@ -4,9 +4,15 @@ import java.util.ArrayList;
 public class PasswordManager {
 	private static ArrayList<User> users = new ArrayList<User>();
 	private static Scanner ui = new Scanner(System.in);
-	private static User system_user = null;
 
 	public static void main(String[] args){
+		users = DataManager.loadData();
+
+		User system_user;
+		for (User user: users)
+			if (user.category.equals("System"))
+				system_user = user;
+
 		if (system_user == null) {
 			System.out.println("No admin account found, create one now");
 			system_user = createSystemUser();
@@ -38,6 +44,7 @@ public class PasswordManager {
 					break;
 				case 6:
 					should_continue = false;
+					DataManager.saveData(system_user, users);
 					break;
 				default:
 					System.out.println("Invalid action, please try again");

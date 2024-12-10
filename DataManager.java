@@ -86,6 +86,7 @@ public class DataManager {
 
 	public static ArrayList<User> loadData(User system_user) {
 		ArrayList<User> users = new ArrayList<User>();
+		ArrayList<String> data = new ArrayList<String>();
 
 		File file = new File(fileName);
 		Scanner reader = null;
@@ -99,15 +100,39 @@ public class DataManager {
 		if (reader == null)
 			return null;
 
-		String current_category = "System";
-		for (String data = null; reader.hasNextLine(); data = reader.nextLine()) {
-			if (data == null)
-				data = reader.nextLine();
-
-			
-		}
+		// Convert the data into an indexable format
+		for (String line = null; reader.hasNextLine(); line = reader.nextLine())
+			data.add(line);
 
 		reader.close();
+
+		for (int i = 1; i < data.size(); i++) {
+			String category = data.get(i);
+
+			String header = "-".repeat(category.length());
+			if (!data.get(i + 1).matches(header))
+				continue;
+
+			int j;
+			for (j = i + 2; j < data.size(); j++) {
+				String name = data.get(j);
+				if (!name.startsWith("\t") || name.startsWith("\t\t"))
+					continue;
+
+				String username = data.get(j + 1);
+				int username_offset;
+				for (username_offset = 1; !username.startsWith("\t\t"); username_offset++)
+					username = data.get(j + username_offset);
+				
+				String password = data.get(j + username_offset);
+				for (int k = username_offset; !password.startsWith("\t\t"); k++)
+					password = data.get(j + k);
+
+				users.add(new User(username, name, password, category, null));
+			}
+			i += j;
+		}
+
 		return users;
 	}
 }
