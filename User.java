@@ -16,6 +16,6 @@ public class User {
 
 	@Override
 	public String toString() {
-		return String.format("\t%s: %s\n", this.name, this.username);
+		return String.format("%s (%s): %s", this.name, this.category, this.username);
 	}
 }

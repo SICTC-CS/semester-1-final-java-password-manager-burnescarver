@@ -1,12 +1,5 @@
 import java.util.Scanner;
-import java.util.Random;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.ArrayList;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.File;
 
 public class PasswordManager {
 	private static ArrayList<User> users = new ArrayList<User>();
@@ -14,14 +7,6 @@ public class PasswordManager {
 	private static User system_user = null;
 
 	public static void main(String[] args){
-		//initializing FileWriter
-		//help from Geeks for Geeks -> (https://www.geeksforgeeks.org/io-bufferedwriter-class-methods-java/)
-		// FileWriter dataSave;
-		// dataSave = new FileWriter("dataSave.txt");
-
-		// Initializing BufferedWriter
-		// BufferedWriter fileEdit = new BufferedWriter(dataSave);
-		
 		if (system_user == null) {
 			System.out.println("No admin account found, create one now");
 			system_user = createSystemUser();
@@ -71,9 +56,10 @@ public class PasswordManager {
 
 		for (String category: categories) {
 			System.out.println(category);
+			System.out.println("-".repeat(category.length()));
 			for (User user: users)
-				if (user.category == category)
-					System.out.println(user);
+				if (user.category.equals(category))
+					System.out.printf("\t%s: %s\n", user.name, user.username);
 		}
 	}
 
@@ -88,7 +74,11 @@ public class PasswordManager {
 		String category = ui.nextLine().trim();
 
 		String password;
-		System.out.println("Password Requirements\n\t- At least one capital\n\t- At least one number\n\t- At least one special character (!@#$%&*?)\n\tAt least 8 characters long");
+		System.out.println("Password Requirements");
+		System.out.println("\t- At least one capital");
+		System.out.println("\t- At least one number");
+		System.out.println("\t- At least one special character (!@#$%&*?)\n");
+		System.out.println("\t- At least 8 characters long");
 		do {
 			System.out.print("Password (Empty for random): ");
 			password = ui.nextLine().trim();
@@ -107,7 +97,11 @@ public class PasswordManager {
 		String username = ui.nextLine().trim();
 
 		String password;
-		System.out.println("Password Requirements\n\t- At least one capital\n\t- At least one number\n\t- At least one special character (!@#$%&*?)\n\tAt least 8 characters long");
+		System.out.println("Password Requirements");
+		System.out.println("\t- At least one capital");
+		System.out.println("\t- At least one number");
+		System.out.println("\t- At least one special character (!@#$%&*?)\n");
+		System.out.println("\t- At least 8 characters long");
 		do {
 			System.out.print("Password: ");
 			password = ui.nextLine().trim();
@@ -120,6 +114,7 @@ public class PasswordManager {
 		int choice = userChoice();
 		if (choice == -1)
 			return;
+
 		User chosen = users.get(choice);
 
 		System.out.printf("%s (%s):\n\tUsername: %s\n\tPassword: %s\n", 
@@ -135,7 +130,7 @@ public class PasswordManager {
 			System.out.print("Username: ");
 			String username = ui.nextLine().trim();
 
-			if (system_user.username == username) {
+			if (system_user.username.equals(username)) {
 				found_user = true;
 				break;
 			}
@@ -152,7 +147,7 @@ public class PasswordManager {
 			System.out.print("Password: ");
 			String password = ui.nextLine().trim();
 
-			if (system_user.password == password) {
+			if (system_user.password.equals(password)) {
 				System.out.println("Login successful");
 				return true;
 			}
@@ -163,7 +158,64 @@ public class PasswordManager {
 	}
 
 	public static void updateUser(){
-		System.out.println("UNFINISHED!!!!!");
+		int choice = userChoice();
+		if (choice == -1)
+			return;
+
+		User user = users.get(choice);
+		
+		boolean choosing = true;
+		do {
+			System.out.println("Edit Property: ");
+			System.out.println("\t1. Name: " + user.name);
+			System.out.println("\t2. Username: " + user.username);
+			System.out.println("\t3. Category: " + user.category);
+			System.out.println("\t4. Password: " + user.password);
+			System.out.println("\t5. Done");
+
+			System.out.print("Choice: ");
+			int prop_choice = ui.nextInt();
+			ui.nextLine();
+			
+			switch (prop_choice) {
+				case 1:
+					System.out.print("Enter new name: ");
+					user.name = ui.nextLine().trim();
+					break;
+				case 2:
+					System.out.print("Enter new username: ");
+					user.username = ui.nextLine().trim();
+					break;
+				case 3:
+					System.out.print("Enter new category: ");
+					user.category = ui.nextLine().trim();
+					break;
+				case 4:
+					String password;
+					System.out.println("Password Requirements");
+					System.out.println("\t- At least one capital");
+					System.out.println("\t- At least one number");
+					System.out.println("\t- At least one special character (!@#$%&*?)\n");
+					System.out.println("\t- At least 8 characters long");
+					do {
+						System.out.print("Enter new password (Empty for random): ");
+						password = ui.nextLine().trim();
+
+						if (password.isBlank()) {
+							password = Password.generate(user.name, user.username, user.category);
+							break;
+						}
+					} while (!Password.check(password));
+					user.password = password;
+					break;
+				case 5:
+					choosing = false;
+					break;
+				default:
+					System.out.println("Invalid Property, try again");
+					break;
+			}
+		} while (choosing);
 	}
 
 	public static void deleteUser(){
@@ -172,7 +224,7 @@ public class PasswordManager {
 			return;
 
 		System.out.print("Confirm [y/N]: ");
-		char input = Character.toLowerCase((char)ui.nextByte());
+		char input = Character.toLowerCase(ui.nextLine().trim().charAt(0));
 
 		if (input == 'y') {
 			users.remove(choice);
@@ -187,10 +239,14 @@ public class PasswordManager {
 			System.out.println("No users to choose from");
 			return -1;
 		}
+
+		System.out.println("\t#. Name (Category): Username");
+		System.out.println("\t----------------------------");
+
 		for (int i = 0; i < users.size(); i++) {
-			System.out.printf("%d. %s\n", i + 1, users.get(i));
+			System.out.printf("\t%d. %s\n", i + 1, users.get(i));
 		}
-		System.out.print("User: ");
+		System.out.print("Choice: ");
 
 		int choice;
 		do {
@@ -199,36 +255,5 @@ public class PasswordManager {
 		} while (choice < 1 || choice > users.size());
 
 		return choice - 1;
-	}
-
-	public static int userChoice(String category) {
-		System.out.println(category);
-		ArrayList<User> category_users = new ArrayList<User>();
-
-		for (User user: users)
-			if (user.category == category)
-				category_users.add(user);
-
-		if (category_users.size() < 1) {
-			System.out.println("No users to choose from");
-			return -1;
-		}
-
-		for (int i = 0; i < category_users.size(); i++) {
-			if (category_users.get(i).category != category) {
-				i--;
-				continue;
-			}
-			System.out.printf("%d. %s\n", i + 1, category_users.get(i));
-		}
-		System.out.print("User: ");
-
-		int choice;
-		do {
-			choice = ui.nextInt();
-			ui.nextLine();
-		} while (choice < 1 || choice > category_users.size());
-
-		return users.indexOf(category_users.get(choice - 1));
 	}
 }
