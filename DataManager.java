@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class DataManager {
 	private final static String fileName = "DATA.txt";
 
-	public static void saveData(User system_user, ArrayList<User> users) {
+	public static void saveData(ArrayList<User> users) {
 		File file = new File(fileName);
 		try {
 			file.createNewFile();
@@ -18,6 +18,7 @@ public class DataManager {
 		catch (IOException e) {
 			System.out.println("Failed to create data file");
 			e.printStackTrace();
+			return;
 		}
 
 		FileWriter writer = null;
@@ -27,20 +28,7 @@ public class DataManager {
 		catch (IOException e) {
 			System.out.println("Failed to open filewriter");
 			e.printStackTrace();
-		}
-		if (writer == null)
 			return;
-
-		try {
-			writer.write(system_user.category + "\n");
-			writer.write("-".repeat(system_user.category.length()) + "\n");
-			writer.write("\t" + system_user.name + "\n");
-			writer.write("\t\t" + system_user.username + "\n");
-			writer.write("\t\t" + system_user.password + "\n");
-		}
-		catch (IOException e) {
-			System.out.println("Failed to save system user");
-			e.printStackTrace();
 		}
 
 		ArrayList<String> categories = new ArrayList<String>();
@@ -84,11 +72,17 @@ public class DataManager {
 
 	}
 
-	public static ArrayList<User> loadData(User system_user) {
-		ArrayList<User> users = new ArrayList<User>();
-		ArrayList<String> data = new ArrayList<String>();
-
+	public static ArrayList<User> loadData() {
 		File file = new File(fileName);
+		try {
+			file.createNewFile();
+		}
+		catch (IOException e) {
+			System.out.println("Failed to create data file");
+			e.printStackTrace();
+			return new ArrayList<User>();
+		}
+
 		Scanner reader = null;
 		try {
 			reader = new Scanner(file);
@@ -96,39 +90,40 @@ public class DataManager {
 		catch (IOException e) {
 			System.out.println("Failed to open reader");
 			e.printStackTrace();
+			return new ArrayList<User>();
 		}
-		if (reader == null)
-			return null;
 
 		// Convert the data into an indexable format
-		for (String line = null; reader.hasNextLine(); line = reader.nextLine())
-			data.add(line);
+		ArrayList<String> data = new ArrayList<String>();
+		while (reader.hasNextLine())
+			data.add(reader.nextLine());
 
 		reader.close();
 
-		for (int i = 1; i < data.size(); i++) {
+		ArrayList<User> users = new ArrayList<User>();
+		for (int i = 0; i < data.size(); i++) {
 			String category = data.get(i);
 
 			String header = "-".repeat(category.length());
 			if (!data.get(i + 1).matches(header))
 				continue;
 
-			int j;
-			for (j = i + 2; j < data.size(); j++) {
-				String name = data.get(j);
-				if (!name.startsWith("\t") || name.startsWith("\t\t"))
+			try {
+				if (!data.get(i + 2).startsWith("\t"))
 					continue;
+			}
+			catch (IndexOutOfBoundsException e) {
+				e.printStackTrace();
+				break;
+			}
 
+			int j;
+			for (j = i + 2; j < data.size(); j += 3) {
+				String name = data.get(j);
 				String username = data.get(j + 1);
-				int username_offset;
-				for (username_offset = 1; !username.startsWith("\t\t"); username_offset++)
-					username = data.get(j + username_offset);
-				
-				String password = data.get(j + username_offset);
-				for (int k = username_offset; !password.startsWith("\t\t"); k++)
-					password = data.get(j + k);
+				String password = data.get(j + 2);
 
-				users.add(new User(username, name, password, category, null));
+				users.add(new User(username.trim(), name.trim(), password.trim(), category.trim(), null));
 			}
 			i += j;
 		}

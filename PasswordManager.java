@@ -8,7 +8,7 @@ public class PasswordManager {
 	public static void main(String[] args){
 		users = DataManager.loadData();
 
-		User system_user;
+		User system_user = null;
 		for (User user: users)
 			if (user.category.equals("System"))
 				system_user = user;
@@ -16,9 +16,9 @@ public class PasswordManager {
 		if (system_user == null) {
 			System.out.println("No admin account found, create one now");
 			system_user = createSystemUser();
-		}
-
-		if (!loginUser())
+			users.add(system_user);
+		} 
+		else if (!loginUser()) 
 			System.exit(1);
 
 		boolean should_continue = true;
@@ -44,7 +44,7 @@ public class PasswordManager {
 					break;
 				case 6:
 					should_continue = false;
-					DataManager.saveData(system_user, users);
+					DataManager.saveData(users);
 					break;
 				default:
 					System.out.println("Invalid action, please try again");
@@ -131,6 +131,13 @@ public class PasswordManager {
 
 	public static boolean loginUser() {
 		System.out.println("Log in");
+
+		User system_user = new User();
+		for (User user: users)
+			if (user.category.equals("System")) {
+				system_user = user;
+				break;
+			}
 
 		boolean found_user = false;
 		for (int i = 0; i < 3; i++) {
