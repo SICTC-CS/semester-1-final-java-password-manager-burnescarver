@@ -119,13 +119,24 @@ public class DataManager {
 
 			int j;
 			for (j = i + 2; j < data.size(); j += 3) {
+				try {
+					if (!data.get(j).startsWith("\t")) {
+						j = 2;
+						break;
+					}
+				}
+				catch (IndexOutOfBoundsException e) {
+					e.printStackTrace();
+					break;
+				}
+
 				String name = data.get(j);
 				String username = data.get(j + 1);
 				String password = data.get(j + 2);
 
 				users.add(new User(username.trim(), name.trim(), password.trim(), category.trim(), null));
 			}
-			i += j;
+			i += j - 1;
 		}
 
 		return users;

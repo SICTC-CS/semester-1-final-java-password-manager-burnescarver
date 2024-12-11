@@ -165,6 +165,7 @@ public class PasswordManager {
 				System.out.println("Login successful");
 				return true;
 			}
+			System.out.println("Invalid password, try again");
 		}
 
 		System.out.println("Login failed");
